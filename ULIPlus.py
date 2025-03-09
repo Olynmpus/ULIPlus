@@ -65,7 +65,33 @@ def run_test_keypad():
     return True
 
 # Streamlit Application
-st.title("Hearing Assessment Suite")
+st.set_page_config(page_title="ULI", page_icon="👂") # Set page title and icon
+
+st.markdown(
+    """
+    <style>
+    .uli-title {
+        font-size:36px !important;
+        font-weight: bold;
+        color: #007bff; /* A nice blue color */
+        text-align: center;
+        position: relative;
+    }
+    .uli-plus {
+        position: absolute;
+        top: -10px; /* Adjust as needed */
+        right: -10px; /* Adjust as needed */
+        font-size: 20px;
+        color: #007bff;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown('<p class="uli-title">ULI<span class="uli-plus">+</span></p>', unsafe_allow_html=True)
+
+st.markdown("---") # Add a horizontal line for visual separation
 
 # --- Icon-Based Navigation ---
 col1, col2, col3, col4 = st.columns(4)
@@ -165,21 +191,4 @@ elif choice == "Fitting":
                 ax.set_xticks(x, labels)
                 ax.legend()
                 st.pyplot(fig)
-            st.session_state.test_complete = False #reset
-elif choice == "Monitoring":
-    st.header("Monitoring")
-    monitoring_snr = st.number_input("Screener/Diagnosis SNR", value=-8.0)
-    if st.button("Run Monitoring"):
-        if run_test_keypad():
-            if st.session_state.test_complete:
-                # Simulate SNR trend data
-                time_points = np.arange(1, 11)  # 10 time points
-                snr_trends = monitoring_snr + np.random.normal(0, 1, size=10).cumsum()  # Simulate trend with noise
-
-                # Plotting
-                fig, ax = plt.subplots()
-                ax.plot(time_points, snr_trends, marker='o')
-                ax.set_xlabel("Time Point")
-                ax.set_ylabel("SNR (dB)")
-                ax.set_title("SNR Trend Over Time")
-                st
+            st
