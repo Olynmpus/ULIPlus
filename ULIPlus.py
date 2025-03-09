@@ -7,14 +7,19 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 import time
 
-# Function to generate normal distribution data
+# Set page title and icon
+st.set_page_config(page_title="Hearing Assessment Suite", page_icon="👂")
+
+# --- Helper Functions ---
+
 def generate_norm_pdf(mean, std, snr_range):
+    """Generates a normal distribution PDF for SNR comparison."""
     x = np.linspace(snr_range[0], snr_range[1], 100)
     pdf = stats.norm.pdf(x, mean, std)
     return x, pdf
 
-# Function for the test keypad screen
 def run_test_keypad():
+    """Simulated test keypad with a progress bar."""
     st.header("Test Keypad")
 
     keypad = [
@@ -27,7 +32,7 @@ def run_test_keypad():
     for i in range(3):
         for j in range(3):
             if cols[j].button(keypad[i][j]):
-                st.write(f"Pressed: {keypad[i][j]}")  # Example action
+                st.write(f"Pressed: {keypad[i][j]}")
 
     if 'test_running' not in st.session_state:
         st.session_state.test_running = False
@@ -59,10 +64,11 @@ def run_test_keypad():
         return False
 
     if st.session_state.test_running:
-        while st.session_state.progress_percent < 100:
+        for i in range(100):
+            time.sleep(0.1)  # Simulate test progress
             st.session_state.progress_percent += 1
             progress_bar.progress(st.session_state.progress_percent)
-            time.sleep(0.1)  # Simulate test progress
+
         st.session_state.test_running = False
         st.session_state.test_complete = True
         st.write("Test complete.")
@@ -70,34 +76,26 @@ def run_test_keypad():
 
     return True
 
-# Streamlit Application
-st.set_page_config(page_title="ULI", page_icon="👂")
-
+# --- UI Layout ---
 st.markdown(
     """
     <style>
     .uli-title {
-        font-size: 48px !important;
+        font-size: 48px;
         font-weight: 900;
         color: #007bff;
         text-align: center;
         margin-bottom: 5px;
-    }
-    .uli-subtitle {
-        font-size: 24px;
-        text-align: center;
-        color: #6c757d;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.markdown('<p class="uli-title">AI-based Universal Language Independent Test</p>', unsafe_allow_html=True)
-
+st.markdown('<p class="uli-title">Hearing Assessment Suite</p>', unsafe_allow_html=True)
 st.markdown("---")
 
-# --- Icon-Based Navigation ---
+# --- Navigation Menu ---
 col1, col2, col3, col4 = st.columns(4)
 
 if col1.button("👂 Screener"):
@@ -109,14 +107,16 @@ elif col3.button("⚙️ Fitting"):
 elif col4.button("📈 Monitoring"):
     choice = "Monitoring"
 else:
-    choice = "Screener"  # default selection
+    choice = "Screener"  # Default selection
 
 if 'test_complete' not in st.session_state:
     st.session_state.test_complete = False
 
-# --- Content Based on Selection ---
+# --- Main Section Based on Choice ---
 if choice == "Screener":
     st.header("Screener")
+
+    # Pre-Test Inputs
     age = st.number_input("Age", min_value=0, max_value=120, value=30)
     gender = st.selectbox("Gender", ["Male", "Female", "Other"])
     social_status = st.text_input("Social Status")
@@ -125,28 +125,26 @@ if choice == "Screener":
     if st.button("Run Screener"):
         if run_test_keypad():
             if st.session_state.test_complete:
-                # Simulate SNR data
-                mean = -8
-                std = 1.6
-                snr_range = (-15, 5)
+                # Generate SNR Data
+                mean, std, snr_range = -8, 1.6, (-15, 5)
                 x, pdf = generate_norm_pdf(mean, std, snr_range)
                 individual_snr = np.random.normal(mean, std)
                 p_value = stats.norm.cdf(individual_snr, mean, std)
 
-                # Plotting
+                # Plot SNR Graph
                 fig, ax = plt.subplots()
                 ax.plot(x, pdf, label="Normative Data")
-                ax.axvline(individual_snr, color='red', linestyle='--', label=f"Individual SNR: {individual_snr:.2f}")
+                ax.axvline(individual_snr, color='red', linestyle='--', label=f"Your SNR: {individual_snr:.2f} dB")
                 ax.set_xlabel("SNR (dB)")
                 ax.set_ylabel("Probability Density")
                 ax.legend()
                 st.pyplot(fig)
                 st.write(f"P-value: {p_value:.4f}")
 
-            st.session_state.test_complete = False  # reset
-
 elif choice == "Diagnosis":
     st.header("Diagnosis")
+
+    # Pre-Test Inputs
     age = st.number_input("Age", min_value=0, max_value=120, value=30)
     gender = st.selectbox("Gender", ["Male", "Female", "Other"])
     social_status = st.text_input("Social Status")
@@ -155,33 +153,39 @@ elif choice == "Diagnosis":
     if st.button("Run Diagnosis"):
         if run_test_keypad():
             if st.session_state.test_complete:
-                # Simulated SNR graph
-                mean = -8
-                std = 1.6
-                snr_range = (-15, 5)
+                mean, std, snr_range = -8, 1.6, (-15, 5)
                 x, pdf = generate_norm_pdf(mean, std, snr_range)
                 individual_snr = np.random.normal(mean, std)
 
-                fig, ax = plt.subplots(figsize=(6, 4))
-                ax.plot(x, pdf, label="Normative Data")
-                ax.axvline(individual_snr, color='red', linestyle='--', label=f"Individual SNR: {individual_snr:.2f}")
-                ax.set_xlabel("SNR (dB)")
-                ax.set_ylabel("Probability Density")
-                ax.legend()
-                st.pyplot(fig)
+                fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 
-            st.session_state.test_complete = False  # reset
+                # Left Graph: SNR Distribution
+                axs[0].plot(x, pdf, label="Normative Data")
+                axs[0].axvline(individual_snr, color='red', linestyle='--', label=f"Your SNR: {individual_snr:.2f}")
+                axs[0].set_xlabel("SNR (dB)")
+                axs[0].set_ylabel("Probability Density")
+                axs[0].legend()
+
+                # Right Graph: Error Proportion Bar Chart
+                vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
+                error_proportion = np.random.randint(0, 101, 6)
+                axs[1].bar(vowels + consonants, error_proportion)
+                axs[1].set_ylabel("Error Proportion (%)")
+
+                st.pyplot(fig)
 
 elif choice == "Fitting":
     st.header("Fitting")
+
+    # Pre-Test Inputs
     diagnosis_snr = st.number_input("Diagnosis SNR", value=-8.0)
+
     if st.button("Run Fitting"):
         if run_test_keypad():
             if st.session_state.test_complete:
-                vowels = ["a", "o", "i"]
-                consonants = ["Low", "Mid", "High"]
-                pre_fitting = np.random.randint(0, 101, size=6)
-                post_fitting = np.random.randint(0, 101, size=6)
+                vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
+                pre_fitting = np.random.randint(50, 101, 6)
+                post_fitting = np.random.randint(50, 101, 6)
 
                 fig, ax = plt.subplots()
                 ax.bar(vowels + consonants, pre_fitting, alpha=0.6, label="Pre-Fitting")
@@ -189,3 +193,15 @@ elif choice == "Fitting":
                 ax.set_ylabel("Percentage Correct (%)")
                 ax.legend()
                 st.pyplot(fig)
+
+elif choice == "Monitoring":
+    st.header("Monitoring")
+
+    # Simulated SNR Trend
+    snr_trend = np.random.normal(-8, 1.6, 10)
+    fig, ax = plt.subplots()
+    ax.plot(range(1, 11), snr_trend, marker='o', linestyle='-', label="SNR Trend")
+    ax.set_xlabel("Time (Sessions)")
+    ax.set_ylabel("SNR (dB)")
+    ax.legend()
+    st.pyplot(fig)
