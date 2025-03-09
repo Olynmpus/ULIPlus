@@ -1,3 +1,5 @@
+# hearing_app.py
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,9 +14,21 @@ def generate_norm_pdf(mean, std, snr_range):
 # Streamlit Application
 st.title("Hearing Assessment Suite")
 
-menu = ["Screener", "Diagnosis", "Fitting", "Monitoring"]
-choice = st.sidebar.selectbox("Select Assessment", menu)
+# --- Icon-Based Navigation ---
+col1, col2, col3, col4 = st.columns(4)
 
+if col1.button("👂 Screener"):
+    choice = "Screener"
+elif col2.button("🩺 Diagnosis"):
+    choice = "Diagnosis"
+elif col3.button("⚙️ Fitting"):
+    choice = "Fitting"
+elif col4.button("📈 Monitoring"):
+    choice = "Monitoring"
+else:
+    choice = "Screener" #default selection
+
+# --- Content Based on Selection ---
 if choice == "Screener":
     st.header("Screener")
     age = st.number_input("Age", min_value=0, max_value=120, value=30)
