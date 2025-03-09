@@ -4,18 +4,11 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-import time
 
 # Set page title and icon
 st.set_page_config(page_title="Hearing Assessment Suite", page_icon="👂")
 
 # --- Ensure Session State is Initialized ---
-if "test_running" not in st.session_state:
-    st.session_state.test_running = False
-if "test_complete" not in st.session_state:
-    st.session_state.test_complete = False
-if "progress_percent" not in st.session_state:
-    st.session_state.progress_percent = 0
 if "choice" not in st.session_state:
     st.session_state.choice = "Screener"  # Default selection
 
@@ -26,65 +19,23 @@ def generate_norm_pdf(mean, std, snr_range):
     pdf = stats.norm.pdf(x, mean, std)
     return x, pdf
 
-def run_test_keypad():
-    """Simulated test keypad with a progress bar."""
-    st.header("Test Keypad")
-
-    keypad = [
-        ["aka", "obo", "ili"],
-        ["low", "mid", "high"],
-        ["apa", "oto", "uku"]
-    ]
-
-    cols = st.columns(3)
-    for i in range(3):
-        for j in range(3):
-            if cols[j].button(keypad[i][j]):
-                st.write(f"Pressed: {keypad[i][j]}")
-
-    progress_bar = st.progress(st.session_state.progress_percent)
-
-    col_start, col_stop, col_exit = st.columns(3)
-
-    if col_start.button("Start Test"):
-        st.session_state.test_running = True
-        st.session_state.progress_percent = 0
-        st.session_state.test_complete = False
-        progress_bar.progress(0)
-        st.write("Test started...")
-
-    if col_stop.button("Stop Test") or col_exit.button("Exit Test"):
-        st.session_state.test_running = False
-        st.session_state.test_complete = True
-        st.experimental_rerun()  # Ensure UI updates immediately
-
-    if st.session_state.test_running:
-        for i in range(100):
-            time.sleep(0.05)  # Simulate test progress
-            st.session_state.progress_percent += 1
-            progress_bar.progress(st.session_state.progress_percent)
-
-        st.session_state.test_running = False
-        st.session_state.test_complete = True
-        st.experimental_rerun()  # Ensure test completion refreshes UI
-
 # --- UI Layout ---
 st.markdown(
     """
     <style>
     .uli-title {
-        font-size: 48px;
+        font-size: 60px;
         font-weight: 900;
         color: #007bff;
         text-align: center;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.markdown('<p class="uli-title">Hearing Assessment Suite</p>', unsafe_allow_html=True)
+st.markdown('<p class="uli-title"><b>Hearing Assessment Suite</b></p>', unsafe_allow_html=True)
 st.markdown("---")
 
 # --- Persist Menu Selection ---
@@ -112,10 +63,6 @@ if choice == "Screener":
     hearing_frequency = st.selectbox("Frequency of Hearing Problems", ["Never", "Rarely", "Occasionally", "Frequently"])
 
     if st.button("Run Screener"):
-        run_test_keypad()
-
-    # --- Display Graph After Test Completion ---
-    if st.session_state.test_complete:
         st.write("### Test Results:")
         mean, std, snr_range = -8, 1.6, (-15, 5)
         x, pdf = generate_norm_pdf(mean, std, snr_range)
@@ -141,9 +88,6 @@ elif choice == "Diagnosis":
     hearing_frequency = st.selectbox("Frequency of Hearing Problems", ["Never", "Rarely", "Occasionally", "Frequently"])
 
     if st.button("Run Diagnosis"):
-        run_test_keypad()
-
-    if st.session_state.test_complete:
         st.write("### Diagnosis Results:")
         mean, std, snr_range = -8, 1.6, (-15, 5)
         x, pdf = generate_norm_pdf(mean, std, snr_range)
@@ -162,4 +106,35 @@ elif choice == "Diagnosis":
         axs[1].bar(vowels + consonants, error_proportion)
         axs[1].set_ylabel("Error Proportion (%)")
 
+        st.pyplot(fig)
+
+elif choice == "Fitting":
+    st.header("Fitting")
+
+    diagnosis_snr = st.number_input("Diagnosis SNR", value=-8.0)
+
+    if st.button("Run Fitting"):
+        st.write("### Fitting Results:")
+        vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
+        pre_fitting = np.random.randint(50, 101, 6)
+        post_fitting = np.random.randint(50, 101, 6)
+
+        fig, ax = plt.subplots()
+        ax.bar(vowels + consonants, pre_fitting, alpha=0.6, label="Pre-Fitting")
+        ax.bar(vowels + consonants, post_fitting, alpha=0.6, label="Post-Fitting", bottom=pre_fitting)
+        ax.set_ylabel("Percentage Correct (%)")
+        ax.legend()
+        st.pyplot(fig)
+
+elif choice == "Monitoring":
+    st.header("Monitoring")
+
+    if st.button("Generate Monitoring Data"):
+        st.write("### Monitoring Results:")
+        snr_trend = np.random.normal(-8, 1.6, 10)
+        fig, ax = plt.subplots()
+        ax.plot(range(1, 11), snr_trend, marker='o', linestyle='-', label="SNR Trend")
+        ax.set_xlabel("Time (Sessions)")
+        ax.set_ylabel("SNR (dB)")
+        ax.legend()
         st.pyplot(fig)
