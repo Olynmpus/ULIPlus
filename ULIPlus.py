@@ -32,6 +32,7 @@ def run_test_keypad():
             if cols[j].button(keypad[i][j]):
                 st.write(f"Pressed: {keypad[i][j]}")
 
+    # Ensure session state is correctly managed
     if 'test_running' not in st.session_state:
         st.session_state.test_running = False
     if 'test_complete' not in st.session_state:
@@ -53,8 +54,7 @@ def run_test_keypad():
     if col_stop.button("Stop Test") or col_exit.button("Exit Test"):
         st.session_state.test_running = False
         st.session_state.test_complete = True
-        st.write("Test stopped.")
-        return False  # Stop the test and allow graph display
+        st.experimental_rerun()  # Ensure UI updates immediately
 
     if st.session_state.test_running:
         for i in range(100):
@@ -64,10 +64,7 @@ def run_test_keypad():
 
         st.session_state.test_running = False
         st.session_state.test_complete = True
-        st.write("Test complete.")
-        return False
-
-    return True
+        st.experimental_rerun()  # Ensure test completion refreshes UI
 
 # --- UI Layout ---
 st.markdown(
@@ -164,36 +161,4 @@ elif choice == "Diagnosis":
         axs[1].bar(vowels + consonants, error_proportion)
         axs[1].set_ylabel("Error Proportion (%)")
 
-        st.pyplot(fig)
-
-elif choice == "Fitting":
-    st.header("Fitting")
-
-    diagnosis_snr = st.number_input("Diagnosis SNR", value=-8.0)
-
-    if st.button("Run Fitting"):
-        run_test_keypad()
-
-    if st.session_state.test_complete:
-        vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
-        pre_fitting = np.random.randint(50, 101, 6)
-        post_fitting = np.random.randint(50, 101, 6)
-
-        fig, ax = plt.subplots()
-        ax.bar(vowels + consonants, pre_fitting, alpha=0.6, label="Pre-Fitting")
-        ax.bar(vowels + consonants, post_fitting, alpha=0.6, label="Post-Fitting", bottom=pre_fitting)
-        ax.set_ylabel("Percentage Correct (%)")
-        ax.legend()
-        st.pyplot(fig)
-
-elif choice == "Monitoring":
-    st.header("Monitoring")
-
-    if st.button("Generate Monitoring Data"):
-        snr_trend = np.random.normal(-8, 1.6, 10)
-        fig, ax = plt.subplots()
-        ax.plot(range(1, 11), snr_trend, marker='o', linestyle='-', label="SNR Trend")
-        ax.set_xlabel("Time (Sessions)")
-        ax.set_ylabel("SNR (dB)")
-        ax.legend()
         st.pyplot(fig)
