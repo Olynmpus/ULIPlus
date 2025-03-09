@@ -29,58 +29,64 @@ def run_test_keypad():
             if cols[j].button(keypad[i][j]):
                 st.write(f"Pressed: {keypad[i][j]}")  # Example action
 
-    progress_bar = st.progress(0)
-    progress_percent = 0
-    test_running = False
+    if 'test_running' not in st.session_state:
+        st.session_state.test_running = False
+    if 'test_complete' not in st.session_state:
+        st.session_state.test_complete = False
+    if 'progress_percent' not in st.session_state:
+        st.session_state.progress_percent = 0
+
+    progress_bar = st.progress(st.session_state.progress_percent)
 
     col_start, col_stop, col_exit = st.columns(3)
 
-    if col_start.button("Start Test") and not test_running:
-        test_running = True
-        progress_percent = 0
+    if col_start.button("Start Test"):
+        st.session_state.test_running = True
+        st.session_state.progress_percent = 0
+        st.session_state.test_complete = False
         progress_bar.progress(0)
         st.write("Test started...")
 
-    if col_stop.button("Stop Test") and test_running:
-        test_running = False
-        st.session_state.test_complete = True  # test stopped, allow graphs to appear
+    if col_stop.button("Stop Test"):
+        st.session_state.test_running = False
+        st.session_state.test_complete = True
         st.write("Test stopped.")
         return False
 
     if col_exit.button("Exit Test"):
-        st.session_state.test_complete = False  # test exited, don't allow graphs to appear
+        st.session_state.test_running = False
+        st.session_state.test_complete = False
         return False
 
-    if test_running:
-        if progress_percent < 100:
-            progress_percent += 1
-            progress_bar.progress(progress_percent)
+    if st.session_state.test_running:
+        while st.session_state.progress_percent < 100:
+            st.session_state.progress_percent += 1
+            progress_bar.progress(st.session_state.progress_percent)
             time.sleep(0.1)  # Simulate test progress
-        else:
-            test_running = False
-            st.session_state.test_complete = True  # test complete, allow graphs to appear
-            st.write("Test complete.")
-            return False
+        st.session_state.test_running = False
+        st.session_state.test_complete = True
+        st.write("Test complete.")
+        return False
 
     return True
 
 # Streamlit Application
-st.set_page_config(page_title="ULI", page_icon="👂")  # Set page title and icon
+st.set_page_config(page_title="ULI", page_icon="👂")
 
 st.markdown(
     """
     <style>
     .uli-title {
         font-size: 48px !important;
-        font-weight: 900; /* Extra bold */
-        color: #007bff; /* A nice blue color */
+        font-weight: 900;
+        color: #007bff;
         text-align: center;
-        margin-bottom: 5px; /* Add a little space below the title */
+        margin-bottom: 5px;
     }
     .uli-subtitle {
         font-size: 24px;
         text-align: center;
-        color: #6c757d; /* A subtle gray */
+        color: #6c757d;
     }
     </style>
     """,
@@ -89,7 +95,7 @@ st.markdown(
 
 st.markdown('<p class="uli-title">AI-based Universal Language Independent Test</p>', unsafe_allow_html=True)
 
-st.markdown("---")  # Add a horizontal line for visual separation
+st.markdown("---")
 
 # --- Icon-Based Navigation ---
 col1, col2, col3, col4 = st.columns(4)
@@ -124,8 +130,8 @@ if choice == "Screener":
                 std = 1.6
                 snr_range = (-15, 5)
                 x, pdf = generate_norm_pdf(mean, std, snr_range)
-                individual_snr = np.random.normal(mean, std)  # Simulate individual SNR
-                p_value = stats.norm.cdf(individual_snr, mean, std)  # generate p value
+                individual_snr = np.random.normal(mean, std)
+                p_value = stats.norm.cdf(individual_snr, mean, std)
 
                 # Plotting
                 fig, ax = plt.subplots()
@@ -136,7 +142,9 @@ if choice == "Screener":
                 ax.legend()
                 st.pyplot(fig)
                 st.write(f"P-value: {p_value:.4f}")
+
             st.session_state.test_complete = False  # reset
+
 elif choice == "Diagnosis":
     st.header("Diagnosis")
     age = st.number_input("Age", min_value=0, max_value=120, value=30)
@@ -147,26 +155,21 @@ elif choice == "Diagnosis":
     if st.button("Run Diagnosis"):
         if run_test_keypad():
             if st.session_state.test_complete:
-                # simulated SNR graph
+                # Simulated SNR graph
                 mean = -8
                 std = 1.6
                 snr_range = (-15, 5)
                 x, pdf = generate_norm_pdf(mean, std, snr_range)
                 individual_snr = np.random.normal(mean, std)
-                fig, ax = plt.subplots(1, 2, figsize=(10, 4))
-                ax[0].plot(x, pdf, label="Normative Data")
-                ax[0].axvline(individual_snr, color='red', linestyle='--', label=f"Individual SNR: {individual_snr:.2f}")
-                ax[0].set_xlabel("SNR (dB)")
-                ax[0].set_ylabel("Probability Density")
-                ax[0].legend()
-                # simulated error proportion bar chart
-                vowels = ["a", "o", "i"]
-                consonants = ["Low", "Mid", "High"]
-                error_proportion = np.random.randint(0, 101, size=6)
-                labels = vowels + consonants
-                ax[1].bar(labels, error_proportion)
-                ax[1].set_ylabel("Error Proportion (%)")
+
+                fig, ax = plt.subplots(figsize=(6, 4))
+                ax.plot(x, pdf, label="Normative Data")
+                ax.axvline(individual_snr, color='red', linestyle='--', label=f"Individual SNR: {individual_snr:.2f}")
+                ax.set_xlabel("SNR (dB)")
+                ax.set_ylabel("Probability Density")
+                ax.legend()
                 st.pyplot(fig)
+
             st.session_state.test_complete = False  # reset
 
 elif choice == "Fitting":
@@ -179,13 +182,10 @@ elif choice == "Fitting":
                 consonants = ["Low", "Mid", "High"]
                 pre_fitting = np.random.randint(0, 101, size=6)
                 post_fitting = np.random.randint(0, 101, size=6)
-                labels = vowels + consonants
-                x = np.arange(len(labels))
-                width = 0.35
+
                 fig, ax = plt.subplots()
-                rects1 = ax.bar(x - width / 2, pre_fitting, width, label="Pre-Fitting")
-                rects2 = ax.bar(x + width / 2, post_fitting, width, label="Post-Fitting")
+                ax.bar(vowels + consonants, pre_fitting, alpha=0.6, label="Pre-Fitting")
+                ax.bar(vowels + consonants, post_fitting, alpha=0.6, label="Post-Fitting", bottom=pre_fitting)
                 ax.set_ylabel("Percentage Correct (%)")
-                ax.set_xticks(x, labels)
                 ax.legend()
-                st.
+                st.pyplot(fig)
