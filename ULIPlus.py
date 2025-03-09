@@ -1,3 +1,5 @@
+# ULIPlus.py
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -184,4 +186,4 @@ elif choice == "Test Keypad":
         st.session_state.pop('previous_choice', None) #clean up session state.
     else:
          if 'previous_choice' not in st.session_state:
-            st.session_state.previous_choice = st.session_state.
+            st.session_state.previous_choice = choice #corrected line.
