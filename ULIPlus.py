@@ -9,6 +9,14 @@ import time
 # Set page title and icon
 st.set_page_config(page_title="Hearing Assessment Suite", page_icon="👂")
 
+# --- Initialize Session State ---
+if "test_running" not in st.session_state:
+    st.session_state.test_running = False
+if "test_complete" not in st.session_state:
+    st.session_state.test_complete = False
+if "progress_percent" not in st.session_state:
+    st.session_state.progress_percent = 0
+
 # --- Helper Functions ---
 def generate_norm_pdf(mean, std, snr_range):
     """Generates a normal distribution PDF for SNR comparison."""
@@ -31,14 +39,6 @@ def run_test_keypad():
         for j in range(3):
             if cols[j].button(keypad[i][j]):
                 st.write(f"Pressed: {keypad[i][j]}")
-
-    # Ensure session state is correctly managed
-    if 'test_running' not in st.session_state:
-        st.session_state.test_running = False
-    if 'test_complete' not in st.session_state:
-        st.session_state.test_complete = False
-    if 'progress_percent' not in st.session_state:
-        st.session_state.progress_percent = 0
 
     progress_bar = st.progress(st.session_state.progress_percent)
 
@@ -99,9 +99,6 @@ elif col4.button("📈 Monitoring"):
 else:
     choice = "Screener"  # Default selection
 
-if 'test_complete' not in st.session_state:
-    st.session_state.test_complete = False
-
 # --- Main Section Based on Choice ---
 if choice == "Screener":
     st.header("Screener")
@@ -117,6 +114,7 @@ if choice == "Screener":
 
     # --- Display Graph After Test Completion ---
     if st.session_state.test_complete:
+        st.write("### Test Results:")
         mean, std, snr_range = -8, 1.6, (-15, 5)
         x, pdf = generate_norm_pdf(mean, std, snr_range)
         individual_snr = np.random.normal(mean, std)
@@ -144,6 +142,7 @@ elif choice == "Diagnosis":
         run_test_keypad()
 
     if st.session_state.test_complete:
+        st.write("### Diagnosis Results:")
         mean, std, snr_range = -8, 1.6, (-15, 5)
         x, pdf = generate_norm_pdf(mean, std, snr_range)
         individual_snr = np.random.normal(mean, std)
