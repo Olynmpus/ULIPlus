@@ -1,5 +1,7 @@
 # ULIPlus.py
 # Author : Jorge Mejia
+# ULI.py
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -75,13 +77,19 @@ st.markdown(
         color: #007bff; /* A nice blue color */
         text-align: center;
         position: relative;
+        display: inline-block; /* Ensure inline-block for proper positioning */
     }
     .uli-plus {
-        position: absolute;
+        position: relative; /* Use relative positioning */
         top: -10px; /* Adjust as needed */
-        right: -10px; /* Adjust as needed */
+        left: 2px; /* Adjust as needed */
         font-size: 20px;
         color: #007bff;
+    }
+    .uli-subtitle {
+        font-size: 18px;
+        text-align: center;
+        color: #6c757d; /* A subtle gray */
     }
     </style>
     """,
@@ -89,6 +97,7 @@ st.markdown(
 )
 
 st.markdown('<p class="uli-title">ULI<span class="uli-plus">+</span></p>', unsafe_allow_html=True)
+st.markdown('<p class="uli-subtitle">AI-based Universal Language Independent Test</p>', unsafe_allow_html=True)
 
 st.markdown("---") # Add a horizontal line for visual separation
 
@@ -184,10 +193,3 @@ elif choice == "Fitting":
                 x = np.arange(len(labels))
                 width = 0.35
                 fig, ax = plt.subplots()
-                rects1 = ax.bar(x - width/2, pre_fitting, width, label="Pre-Fitting")
-                rects2 = ax.bar(x + width/2, post_fitting, width, label="Post-Fitting")
-                ax.set_ylabel("Percentage Correct (%)")
-                ax.set_xticks(x, labels)
-                ax.legend()
-                st.pyplot(fig)
-            st
