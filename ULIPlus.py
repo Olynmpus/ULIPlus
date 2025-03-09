@@ -1,6 +1,5 @@
 # ULIPlus.py
 # Author : Jorge Mejia
-# ULI.py
 
 import streamlit as st
 import numpy as np
@@ -44,12 +43,12 @@ def run_test_keypad():
 
     if col_stop.button("Stop Test") and test_running:
         test_running = False
-        st.session_state.test_complete = True #test stopped, allow graphs to appear
+        st.session_state.test_complete = True  # test stopped, allow graphs to appear
         st.write("Test stopped.")
         return False
 
     if col_exit.button("Exit Test"):
-        st.session_state.test_complete = False #test exited, don't allow graphs to appear
+        st.session_state.test_complete = False  # test exited, don't allow graphs to appear
         return False
 
     if test_running:
@@ -59,35 +58,27 @@ def run_test_keypad():
             time.sleep(0.1)  # Simulate test progress
         else:
             test_running = False
-            st.session_state.test_complete = True #test complete, allow graphs to appear
+            st.session_state.test_complete = True  # test complete, allow graphs to appear
             st.write("Test complete.")
             return False
 
     return True
 
 # Streamlit Application
-st.set_page_config(page_title="ULI", page_icon="👂") # Set page title and icon
+st.set_page_config(page_title="ULI", page_icon="👂")  # Set page title and icon
 
 st.markdown(
     """
     <style>
     .uli-title {
-        font-size:36px !important;
-        font-weight: bold;
+        font-size: 48px !important;
+        font-weight: 900; /* Extra bold */
         color: #007bff; /* A nice blue color */
         text-align: center;
-        position: relative;
-        display: inline-block; /* Ensure inline-block for proper positioning */
-    }
-    .uli-plus {
-        position: relative; /* Use relative positioning */
-        top: -10px; /* Adjust as needed */
-        left: 2px; /* Adjust as needed */
-        font-size: 20px;
-        color: #007bff;
+        margin-bottom: 5px; /* Add a little space below the title */
     }
     .uli-subtitle {
-        font-size: 18px;
+        font-size: 24px;
         text-align: center;
         color: #6c757d; /* A subtle gray */
     }
@@ -96,10 +87,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown('<p class="uli-title">ULI<span class="uli-plus">+</span></p>', unsafe_allow_html=True)
-st.markdown('<p class="uli-subtitle">AI-based Universal Language Independent Test</p>', unsafe_allow_html=True)
+st.markdown('<p class="uli-title">AI-based Universal Language Independent Test</p>', unsafe_allow_html=True)
 
-st.markdown("---") # Add a horizontal line for visual separation
+st.markdown("---")  # Add a horizontal line for visual separation
 
 # --- Icon-Based Navigation ---
 col1, col2, col3, col4 = st.columns(4)
@@ -113,7 +103,7 @@ elif col3.button("⚙️ Fitting"):
 elif col4.button("📈 Monitoring"):
     choice = "Monitoring"
 else:
-    choice = "Screener" #default selection
+    choice = "Screener"  # default selection
 
 if 'test_complete' not in st.session_state:
     st.session_state.test_complete = False
@@ -135,7 +125,7 @@ if choice == "Screener":
                 snr_range = (-15, 5)
                 x, pdf = generate_norm_pdf(mean, std, snr_range)
                 individual_snr = np.random.normal(mean, std)  # Simulate individual SNR
-                p_value = stats.norm.cdf(individual_snr, mean, std) #generate p value
+                p_value = stats.norm.cdf(individual_snr, mean, std)  # generate p value
 
                 # Plotting
                 fig, ax = plt.subplots()
@@ -146,7 +136,7 @@ if choice == "Screener":
                 ax.legend()
                 st.pyplot(fig)
                 st.write(f"P-value: {p_value:.4f}")
-            st.session_state.test_complete = False #reset
+            st.session_state.test_complete = False  # reset
 elif choice == "Diagnosis":
     st.header("Diagnosis")
     age = st.number_input("Age", min_value=0, max_value=120, value=30)
@@ -157,19 +147,19 @@ elif choice == "Diagnosis":
     if st.button("Run Diagnosis"):
         if run_test_keypad():
             if st.session_state.test_complete:
-                #simulated SNR graph
+                # simulated SNR graph
                 mean = -8
                 std = 1.6
                 snr_range = (-15, 5)
                 x, pdf = generate_norm_pdf(mean, std, snr_range)
                 individual_snr = np.random.normal(mean, std)
-                fig, ax = plt.subplots(1, 2, figsize = (10,4))
+                fig, ax = plt.subplots(1, 2, figsize=(10, 4))
                 ax[0].plot(x, pdf, label="Normative Data")
                 ax[0].axvline(individual_snr, color='red', linestyle='--', label=f"Individual SNR: {individual_snr:.2f}")
                 ax[0].set_xlabel("SNR (dB)")
                 ax[0].set_ylabel("Probability Density")
                 ax[0].legend()
-                #simulated error proportion bar chart
+                # simulated error proportion bar chart
                 vowels = ["a", "o", "i"]
                 consonants = ["Low", "Mid", "High"]
                 error_proportion = np.random.randint(0, 101, size=6)
@@ -177,7 +167,7 @@ elif choice == "Diagnosis":
                 ax[1].bar(labels, error_proportion)
                 ax[1].set_ylabel("Error Proportion (%)")
                 st.pyplot(fig)
-            st.session_state.test_complete = False #reset
+            st.session_state.test_complete = False  # reset
 
 elif choice == "Fitting":
     st.header("Fitting")
@@ -193,3 +183,9 @@ elif choice == "Fitting":
                 x = np.arange(len(labels))
                 width = 0.35
                 fig, ax = plt.subplots()
+                rects1 = ax.bar(x - width / 2, pre_fitting, width, label="Pre-Fitting")
+                rects2 = ax.bar(x + width / 2, post_fitting, width, label="Post-Fitting")
+                ax.set_ylabel("Percentage Correct (%)")
+                ax.set_xticks(x, labels)
+                ax.legend()
+                st.
