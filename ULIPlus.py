@@ -1,6 +1,5 @@
 # ULIPlus.py
 # Author : Jorge Mejia
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -52,16 +51,11 @@ def run_test_keypad():
         progress_bar.progress(0)
         st.write("Test started...")
 
-    if col_stop.button("Stop Test"):
+    if col_stop.button("Stop Test") or col_exit.button("Exit Test"):
         st.session_state.test_running = False
         st.session_state.test_complete = True
         st.write("Test stopped.")
-        return False
-
-    if col_exit.button("Exit Test"):
-        st.session_state.test_running = False
-        st.session_state.test_complete = False
-        return False
+        return False  # Stop the test and allow graph display
 
     if st.session_state.test_running:
         for i in range(100):
@@ -123,23 +117,22 @@ if choice == "Screener":
     hearing_frequency = st.selectbox("Frequency of Hearing Problems", ["Never", "Rarely", "Occasionally", "Frequently"])
 
     if st.button("Run Screener"):
-        if run_test_keypad():
-            if st.session_state.test_complete:
-                # Generate SNR Data
-                mean, std, snr_range = -8, 1.6, (-15, 5)
-                x, pdf = generate_norm_pdf(mean, std, snr_range)
-                individual_snr = np.random.normal(mean, std)
-                p_value = stats.norm.cdf(individual_snr, mean, std)
+        if run_test_keypad() == False and st.session_state.test_complete:
+            # Generate SNR Data
+            mean, std, snr_range = -8, 1.6, (-15, 5)
+            x, pdf = generate_norm_pdf(mean, std, snr_range)
+            individual_snr = np.random.normal(mean, std)
+            p_value = stats.norm.cdf(individual_snr, mean, std)
 
-                # Plot SNR Graph
-                fig, ax = plt.subplots()
-                ax.plot(x, pdf, label="Normative Data")
-                ax.axvline(individual_snr, color='red', linestyle='--', label=f"Your SNR: {individual_snr:.2f} dB")
-                ax.set_xlabel("SNR (dB)")
-                ax.set_ylabel("Probability Density")
-                ax.legend()
-                st.pyplot(fig)
-                st.write(f"P-value: {p_value:.4f}")
+            # Plot SNR Graph
+            fig, ax = plt.subplots()
+            ax.plot(x, pdf, label="Normative Data")
+            ax.axvline(individual_snr, color='red', linestyle='--', label=f"Your SNR: {individual_snr:.2f} dB")
+            ax.set_xlabel("SNR (dB)")
+            ax.set_ylabel("Probability Density")
+            ax.legend()
+            st.pyplot(fig)
+            st.write(f"P-value: {p_value:.4f}")
 
 elif choice == "Diagnosis":
     st.header("Diagnosis")
@@ -151,28 +144,27 @@ elif choice == "Diagnosis":
     hearing_frequency = st.selectbox("Frequency of Hearing Problems", ["Never", "Rarely", "Occasionally", "Frequently"])
 
     if st.button("Run Diagnosis"):
-        if run_test_keypad():
-            if st.session_state.test_complete:
-                mean, std, snr_range = -8, 1.6, (-15, 5)
-                x, pdf = generate_norm_pdf(mean, std, snr_range)
-                individual_snr = np.random.normal(mean, std)
+        if run_test_keypad() == False and st.session_state.test_complete:
+            mean, std, snr_range = -8, 1.6, (-15, 5)
+            x, pdf = generate_norm_pdf(mean, std, snr_range)
+            individual_snr = np.random.normal(mean, std)
 
-                fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+            fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 
-                # Left Graph: SNR Distribution
-                axs[0].plot(x, pdf, label="Normative Data")
-                axs[0].axvline(individual_snr, color='red', linestyle='--', label=f"Your SNR: {individual_snr:.2f}")
-                axs[0].set_xlabel("SNR (dB)")
-                axs[0].set_ylabel("Probability Density")
-                axs[0].legend()
+            # Left Graph: SNR Distribution
+            axs[0].plot(x, pdf, label="Normative Data")
+            axs[0].axvline(individual_snr, color='red', linestyle='--', label=f"Your SNR: {individual_snr:.2f}")
+            axs[0].set_xlabel("SNR (dB)")
+            axs[0].set_ylabel("Probability Density")
+            axs[0].legend()
 
-                # Right Graph: Error Proportion Bar Chart
-                vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
-                error_proportion = np.random.randint(0, 101, 6)
-                axs[1].bar(vowels + consonants, error_proportion)
-                axs[1].set_ylabel("Error Proportion (%)")
+            # Right Graph: Error Proportion Bar Chart
+            vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
+            error_proportion = np.random.randint(0, 101, 6)
+            axs[1].bar(vowels + consonants, error_proportion)
+            axs[1].set_ylabel("Error Proportion (%)")
 
-                st.pyplot(fig)
+            st.pyplot(fig)
 
 elif choice == "Fitting":
     st.header("Fitting")
@@ -181,27 +173,27 @@ elif choice == "Fitting":
     diagnosis_snr = st.number_input("Diagnosis SNR", value=-8.0)
 
     if st.button("Run Fitting"):
-        if run_test_keypad():
-            if st.session_state.test_complete:
-                vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
-                pre_fitting = np.random.randint(50, 101, 6)
-                post_fitting = np.random.randint(50, 101, 6)
+        if run_test_keypad() == False and st.session_state.test_complete:
+            vowels, consonants = ["a", "o", "i"], ["Low", "Mid", "High"]
+            pre_fitting = np.random.randint(50, 101, 6)
+            post_fitting = np.random.randint(50, 101, 6)
 
-                fig, ax = plt.subplots()
-                ax.bar(vowels + consonants, pre_fitting, alpha=0.6, label="Pre-Fitting")
-                ax.bar(vowels + consonants, post_fitting, alpha=0.6, label="Post-Fitting", bottom=pre_fitting)
-                ax.set_ylabel("Percentage Correct (%)")
-                ax.legend()
-                st.pyplot(fig)
+            fig, ax = plt.subplots()
+            ax.bar(vowels + consonants, pre_fitting, alpha=0.6, label="Pre-Fitting")
+            ax.bar(vowels + consonants, post_fitting, alpha=0.6, label="Post-Fitting", bottom=pre_fitting)
+            ax.set_ylabel("Percentage Correct (%)")
+            ax.legend()
+            st.pyplot(fig)
 
 elif choice == "Monitoring":
     st.header("Monitoring")
 
-    # Simulated SNR Trend
-    snr_trend = np.random.normal(-8, 1.6, 10)
-    fig, ax = plt.subplots()
-    ax.plot(range(1, 11), snr_trend, marker='o', linestyle='-', label="SNR Trend")
-    ax.set_xlabel("Time (Sessions)")
-    ax.set_ylabel("SNR (dB)")
-    ax.legend()
-    st.pyplot(fig)
+    if st.button("Generate Monitoring Data"):
+        # Simulated SNR Trend
+        snr_trend = np.random.normal(-8, 1.6, 10)
+        fig, ax = plt.subplots()
+        ax.plot(range(1, 11), snr_trend, marker='o', linestyle='-', label="SNR Trend")
+        ax.set_xlabel("Time (Sessions)")
+        ax.set_ylabel("SNR (dB)")
+        ax.legend()
+        st.pyplot(fig)
