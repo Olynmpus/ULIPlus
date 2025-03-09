@@ -9,13 +9,15 @@ import time
 # Set page title and icon
 st.set_page_config(page_title="Hearing Assessment Suite", page_icon="👂")
 
-# --- Initialize Session State ---
+# --- Ensure Session State is Initialized ---
 if "test_running" not in st.session_state:
     st.session_state.test_running = False
 if "test_complete" not in st.session_state:
     st.session_state.test_complete = False
 if "progress_percent" not in st.session_state:
     st.session_state.progress_percent = 0
+if "choice" not in st.session_state:
+    st.session_state.choice = "Screener"  # Default selection
 
 # --- Helper Functions ---
 def generate_norm_pdf(mean, std, snr_range):
@@ -85,19 +87,19 @@ st.markdown(
 st.markdown('<p class="uli-title">Hearing Assessment Suite</p>', unsafe_allow_html=True)
 st.markdown("---")
 
-# --- Navigation Menu ---
+# --- Persist Menu Selection ---
 col1, col2, col3, col4 = st.columns(4)
 
 if col1.button("👂 Screener"):
-    choice = "Screener"
-elif col2.button("🩺 Diagnosis"):
-    choice = "Diagnosis"
-elif col3.button("⚙️ Fitting"):
-    choice = "Fitting"
-elif col4.button("📈 Monitoring"):
-    choice = "Monitoring"
-else:
-    choice = "Screener"  # Default selection
+    st.session_state.choice = "Screener"
+if col2.button("🩺 Diagnosis"):
+    st.session_state.choice = "Diagnosis"
+if col3.button("⚙️ Fitting"):
+    st.session_state.choice = "Fitting"
+if col4.button("📈 Monitoring"):
+    st.session_state.choice = "Monitoring"
+
+choice = st.session_state.choice  # Persist menu selection across reruns
 
 # --- Main Section Based on Choice ---
 if choice == "Screener":
