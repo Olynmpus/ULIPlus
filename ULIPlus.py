@@ -1,15 +1,60 @@
-# hearing_app.py
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+import time
 
 # Function to generate normal distribution data
 def generate_norm_pdf(mean, std, snr_range):
     x = np.linspace(snr_range[0], snr_range[1], 100)
     pdf = stats.norm.pdf(x, mean, std)
     return x, pdf
+
+# Function for the test keypad screen
+def run_test_keypad():
+    st.header("Test Keypad")
+
+    keypad = [
+        ["aka", "obo", "ili"],
+        ["low", "mid", "high"],
+        ["apa", "oto", "uku"]
+    ]
+
+    cols = st.columns(3)
+    for i in range(3):
+        for j in range(3):
+            if cols[j].button(keypad[i][j]):
+                st.write(f"Pressed: {keypad[i][j]}")  # Example action
+
+    progress_bar = st.progress(0)
+    progress_percent = 0
+    test_running = False
+
+    col_start, col_stop, col_exit = st.columns(3)
+
+    if col_start.button("Start Test") and not test_running:
+        test_running = True
+        progress_percent = 0
+        progress_bar.progress(0)
+        st.write("Test started...")
+
+    if col_stop.button("Stop Test") and test_running:
+        test_running = False
+        st.write("Test stopped.")
+
+    if col_exit.button("Exit Test"):
+        return False
+
+    if test_running:
+        if progress_percent < 100:
+            progress_percent += 1
+            progress_bar.progress(progress_percent)
+            time.sleep(0.1)  # Simulate test progress
+        else:
+            test_running = False
+            st.write("Test complete.")
+
+    return True
 
 # Streamlit Application
 st.title("Hearing Assessment Suite")
@@ -25,6 +70,8 @@ elif col3.button("⚙️ Fitting"):
     choice = "Fitting"
 elif col4.button("📈 Monitoring"):
     choice = "Monitoring"
+elif st.button("▶️ Test Keypad"):
+    choice = "Test Keypad"
 else:
     choice = "Screener" #default selection
 
@@ -118,3 +165,23 @@ elif choice == "Monitoring":
         ax.set_ylabel("SNR (dB)")
         ax.set_title("SNR Trend Over Time")
         st.pyplot(fig)
+
+elif choice == "Test Keypad":
+    if not run_test_keypad():
+        # User exited keypad, generate graphs based on previous choice
+        if 'previous_choice' in st.session_state:
+            choice = st.session_state.previous_choice
+            if choice == "Screener":
+                st.experimental_rerun()
+            elif choice == "Diagnosis":
+                st.experimental_rerun()
+            elif choice == "Fitting":
+                st.experimental_rerun()
+            elif choice == "Monitoring":
+                st.experimental_rerun()
+        else:
+            choice = "Screener" # Default if no previous choice.
+        st.session_state.pop('previous_choice', None) #clean up session state.
+    else:
+         if 'previous_choice' not in st.session_state:
+            st.session_state.previous_choice = st.session_state.
