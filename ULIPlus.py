@@ -48,17 +48,17 @@ st.markdown("---")
 # --- Navigation Buttons ---
 col0, col1, col2, col3, col4, col5 = st.columns(6)
 
-if col0.button("👤 Profile"):
+if col0.button("Profile"):
     st.session_state.choice = "Profile"
-if col1.button("👂 Screener"):
+if col1.button("Screener"):
     st.session_state.choice = "Screener"
-if col2.button("🩺 Diagnosis"):
+if col2.button("Diagnosis"):
     st.session_state.choice = "Diagnosis"
-if col3.button("⚙️ Fitting"):
+if col3.button("Fitting"):
     st.session_state.choice = "Fitting"
-if col4.button("📈 Monitoring"):
+if col4.button("Monitoring"):
     st.session_state.choice = "Monitoring"
-if col5.button("🧾 Summary"):
+if col5.button("Summary"):
     st.session_state.choice = "Summary"
 
 
@@ -200,7 +200,7 @@ elif choice == "Screener":
     # Fancy stacked icon header
     st.markdown("""
         <div style='text-align: center; margin-top: 1em; margin-bottom: 1em;'>
-            <div style='font-size: 60px;'>🎧</div>
+            <div style='font-size: 60px;'>👂</div>
             <h2 style='margin: 0;'>Screener</h2>
         </div>
     """, unsafe_allow_html=True)
